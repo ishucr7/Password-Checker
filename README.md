@@ -28,9 +28,7 @@ Run the following commands on your mysql server. Will add db seeding into it lat
 
 How to run?
 - Inside the root directory(Compile the java files)
-- javac -cp . models/*java dbdriver/*java mypack/*java config/*java run.java
+- javac -cp . models/*java dbdriver/*java mypack/*java run.java
 - java run.java
 
 There you go!
-
-NOTE: We aren't making use of the configuration file yet. So ignnore it!
