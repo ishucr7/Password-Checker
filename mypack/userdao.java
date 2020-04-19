@@ -1,6 +1,5 @@
 package mypack;
 import java.util.Date;
-import mypack.user;
 import mypack.previousPasswords;
 import dbdriver.*;
 import models.*;
@@ -12,7 +11,6 @@ import java.text.SimpleDateFormat;
 public class userdao {
     DBDriver db;
     
-    // Constructor to get the dbdriver created.
     public userdao(DBDriver db){
         this.db = db;
     }
@@ -94,28 +92,30 @@ public class userdao {
         User.username = username;
         User.password = password;
         User.invalid_login_count = 0;
-        user UserX = new user(User);
-        // Message to be sent.
-        
+        User.creation_date = new Date();
+        User.generate_hashed_password();
+        System.out.println("Print the hashed password");
+        System.out.println(User.hashed_password);
+
         String message;
 
-        if(is_username_registered(UserX.User.username)){
+        if(is_username_registered(User.username)){
             message = "There exists an user with the given username";
         }
-        else if(!UserX.does_password_satisy_criteria()){
-            message = "The password doesn't satisfy the following conditions";
+        else if(!User.does_password_satisy_criteria()){
+            message = "The password doesn't satisfy the given conditions";
         }
         else{
 
-            Timestamp ts = new Timestamp(UserX.User.creation_date.getTime());
+            Timestamp ts = new Timestamp(User.creation_date.getTime());
             // Write into the user table.
-            String query = "insert into users values " + "('" + UserX.User.username + "','"+ UserX.User.hashed_password + "','" + UserX.User.invalid_login_count + "','" +
+            String query = "insert into users values " + "('" + User.username + "','"+ User.hashed_password + "','" + User.invalid_login_count + "','" +
                  ts + "', false)";
             this.db.update(query);
 
             // Write into the previous password tables;
             query = "insert into previous_passwords " + 
-                "values ('" + UserX.User.username+"','"+UserX.User.hashed_password+"','" + ts+"')";
+                "values ('" + User.username+"','"+User.hashed_password+"','" + ts+"')";
             this.db.update(query);
             message="User registration successfull";
         }
@@ -146,28 +146,27 @@ public class userdao {
         User.username = username;
         User.password = newpassword;
         User.invalid_login_count = 0;
-        user UserX = new user(User);
         // Message to be sent.
         String message;
 
-        String query = "select * from previous_passwords where  username = '" + UserX.User.username + "'";
+        String query = "select * from previous_passwords where  username = '" + User.username + "'";
 
         ArrayList<PreviousPasswordModel> pplist =  this.db.select_previous_passwords_query(query);
 
         previousPasswords pp = new previousPasswords(pplist);
 
         // Does the new password satisfy the conditions given.
-        if(!UserX.does_password_satisy_criteria()){
+        if(!User.does_password_satisy_criteria()){
             message = "The password doesn't satisfy the following conditions";
         }
         // Because we need the hashed password here.
-        else if(pp.is_this_password_old(UserX.User.hashed_password)){
+        else if(pp.is_this_one_of_old_passwords(User.hashed_password)){
             message = "You need to enter a different password other than your last 5 passwords.";
         }
         else{
             // Update the password into the user tabel
-            Timestamp ts = new Timestamp(UserX.User.creation_date.getTime());
-            query = "update users set password = '" + UserX.User.hashed_password +"' where username = '"+ UserX.User.username + "'";
+            Timestamp ts = new Timestamp(User.creation_date.getTime());
+            query = "update users set password = '" + User.hashed_password +"' where username = '"+ User.username + "'";
             this.db.update(query);
 
             if(pp.get_length_of_list() >=5){
@@ -179,7 +178,7 @@ public class userdao {
 
             // Write into the previous password tables;
             query = "insert into previous_passwords " + 
-                "values ('" + UserX.User.username+"','"+UserX.User.hashed_password+"','" + ts+"')";
+                "values ('" + User.username+"','"+User.hashed_password+"','" + ts+"')";
             this.db.update(query);
 
             message = "Password reset successful";

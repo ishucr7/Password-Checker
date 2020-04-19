@@ -1,0 +1,15 @@
+CREATE TABLE users (
+    username varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    invalid_login_count int DEFAULT 0,
+    creation_date TIMESTAMP,
+    is_locked boolean,
+    PRIMARY KEY (username)
+);
+
+CREATE TABLE previous_passwords (
+    username varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    creation_date TIMESTAMP,
+    PRIMARY KEY (username, password)
+);

@@ -1,3 +1,8 @@
+/**
+ * It is to create the connection with the sql server running.
+ * We'll use this connection to query the database.
+*/
+
 package dbdriver;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,12 +18,11 @@ public class DBConnection {
         // String dbHost = cfg.getProperty("dbHost");
 
         String dbUsername = "root";
-        String dbPassword = "Radhaswami1";
+        String dbPassword = "Radhaswami1"; // Enter your root's password here.
 
         Connection con = null;
         // String url = "jdbc:mysql://" + dbHost + "/" + dbName;
         String url = "jdbc:mysql://localhost:3306/password_checker";
-        System.out.println(url);
     
         try 
         {

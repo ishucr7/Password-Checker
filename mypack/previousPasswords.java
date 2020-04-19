@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import models.PreviousPasswordModel;
 
 public class previousPasswords {
-    ArrayList<PreviousPasswordModel> pplist = new ArrayList<PreviousPasswordModel>();
+
+    public ArrayList<PreviousPasswordModel> pplist = new ArrayList<PreviousPasswordModel>();
 
     previousPasswords(ArrayList<PreviousPasswordModel> pplist){
         this.pplist = pplist;
@@ -26,8 +27,8 @@ public class previousPasswords {
         }
         return oldest_password;
     }
-    public Boolean is_this_password_old(String password){
 
+    public Boolean is_this_one_of_old_passwords(String password){
         for(int i=0;i<this.pplist.size();i++){
             if(this.pplist.get(i).password == password){
                 return true;
