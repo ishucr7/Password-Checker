@@ -59,36 +59,7 @@ public class DBDriver {
     }
 
     /**
-     * It gets the previous_password entry from the previous_passwords table.
-     * 
-     * @param query --- The query that gets the previous_password entry from
-     *                  the sql server.
-     * 
-     * @return PreviousPasswordModel  --- previous_password entry in the form of
-     *                                    PreviousPasswordModel Object.
-     */
-    public PreviousPasswordModel select_pp(String query){
-
-        PreviousPasswordModel pp = new PreviousPasswordModel();
-        try{
-            ResultSet res = this.statement.executeQuery(query);
-            while(res.next()){
-                String username = res.getString("username");
-                String password = res.getString("password");
-                Date date = new Date(res.getTimestamp("creation_date").getTime());
-                pp.username = username;
-                pp.creation_date = date;
-                pp.password = password;
-            }
-        }
-        catch(SQLException e){
-            e.printStackTrace();
-        }
-        return pp;
-    }
-
-    /**
-     * Gets the list of the previous_passwords associated with a particular username.
+     * Executes the select query for previous_passwords table.
      * 
      * @param query -- The sql query that fetches all the entries in the previous_passwords
      *                 table from the sql server.
