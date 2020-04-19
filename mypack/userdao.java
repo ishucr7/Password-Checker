@@ -39,9 +39,7 @@ public class userdao {
      * @return Boolean --- True/False
      */
     private boolean are_valid_credentials(String username, String password){
-        // generate hashed password
-        String hashed_password = password;
-        String query = "select * from users where username = '" + username + "' AND " + "password = '" + hashed_password +"'";
+        String query = "select * from users where username = '" + username + "' AND " + "password = '" + password +"'";
         UserModel User = this.db.select_user_query(query);
         if(User.username!=null){
             return true;
@@ -86,10 +84,10 @@ public class userdao {
     private void update_invalid_login_count(UserModel User){
         String query;
         User.invalid_login_count +=1;
-        query = "update users set invalid_login_count = '"+User.invalid_login_count+"'";
+        query = "update users set invalid_login_count = '"+User.invalid_login_count+"' where username = '" + User.username + "'";
                 // Set the is locked as true;
         if(User.invalid_login_count == 5){
-            query = "update users set is_locked = true, invalid_login_count = '"+User.invalid_login_count+"'";
+            query = "update users set is_locked = true, invalid_login_count = '"+User.invalid_login_count+"' where username = '" + User.username + "'";;
         }
         this.db.update(query);
     }
@@ -106,7 +104,8 @@ public class userdao {
     public String login(String username, String password){
 
         UserModel User = get_user(username);
-
+        User.password = password;
+        User.generate_hashed_password();
         // Message to be sent back.
         String message;
 
@@ -116,13 +115,13 @@ public class userdao {
         else if(User.is_locked){
             message = "Your account has been locked due to 5 invalid login attempts";
         }
-        else if(!are_valid_credentials(username, password)){
+        else if(!are_valid_credentials(username, User.hashed_password)){
             update_invalid_login_count(User);
             message = "Invalid password";
         }
         else{
             // Check if the user hasn't changed password from past 14 days.
-            PreviousPasswordModel pp = get_pp(username, password);
+            PreviousPasswordModel pp = get_pp(username, User.hashed_password);
             Date curr_date = new Date();
             long diff = curr_date.getTime() - pp.creation_date.getTime();
             long difference_in_days =  TimeUnit.DAYS.convert(diff,
@@ -203,15 +202,16 @@ public class userdao {
     public String password_reset(String username, String oldpassword, String newpassword){
 
         // See if the user credentials are valid or not.
-        if(!are_valid_credentials(username, oldpassword)){
+        UserModel User = get_user(username);
+        User.password = oldpassword;
+        User.generate_hashed_password();
+        
+        if(!are_valid_credentials(username, User.hashed_password)){
             return "The user credentials are invalid";
         }
 
-        UserModel User = new UserModel();
-        User.username = username;
         User.password = newpassword;
-        User.invalid_login_count = 0;
-        // Message to be sent.
+        User.generate_hashed_password();
         String message;
 
         String query = "select * from previous_passwords where  username = '" + User.username + "'";

@@ -20,7 +20,7 @@ public class DBDriver {
         this.con = DBConnection.createConnection();
         try{
             this.statement = con.createStatement();
-            System.out.println("You have the connection ready bitches");
+            System.out.println("The connection is up");
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -45,8 +45,10 @@ public class DBDriver {
                 String password = res.getString("password");
                 int invalid_login_count = res.getInt("invalid_login_count");
                 boolean is_locked = res.getBoolean("is_locked");
+                Date date = new Date(res.getTimestamp("creation_date").getTime());
 
                 User.username = username;
+                User.creation_date = date;
                 User.hashed_password = password;
                 User.invalid_login_count = invalid_login_count;
                 User.is_locked = is_locked;
