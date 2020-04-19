@@ -1,6 +1,5 @@
 package mypack;
 import java.util.Date;
-import mypack.previousPasswords;
 import dbdriver.*;
 import models.*;
 import java.sql.*;
@@ -60,6 +59,8 @@ public class userdao {
     private UserModel get_user(String username){
         String query = "select * from users where username = '" + username +"'";
         UserModel User = this.db.select_user_query(query);
+        query = "select * from previous_passwords where  username = '" + username + "'";
+        User.pplist =  this.db.select_previous_passwords_query(query);
         return User;
     }
 
@@ -70,9 +71,8 @@ public class userdao {
      * 
      * @return  --- PreviousPasswordModel object of that given password.
      */
-    public PreviousPasswordModel get_pp_given_password(String password){
-        String query = "select * from previous_passwords where password = '" +
-            password +  "'";
+    private PreviousPasswordModel get_pp(String username, String password){
+        String query = "select * from previous_passwords where username = '" + username + "' AND " + "password = '" + password +"'";
         ArrayList<PreviousPasswordModel> pp = this.db.select_previous_passwords_query(query);
         return pp.get(0);
     }
@@ -122,7 +122,7 @@ public class userdao {
         }
         else{
             // Check if the user hasn't changed password from past 14 days.
-            PreviousPasswordModel pp = get_pp_given_password(password);
+            PreviousPasswordModel pp = get_pp(username, password);
             Date curr_date = new Date();
             long diff = curr_date.getTime() - pp.creation_date.getTime();
             long difference_in_days =  TimeUnit.DAYS.convert(diff,
@@ -183,20 +183,7 @@ public class userdao {
             this.db.update(query);
             message="User registration successfull";
         }
-        System.out.println(message);
         return message;
-    }
-
-
-    private Boolean are_credentials_valid(String username, String password){
-        // generate hashed password
-        String hashed_password = password;
-        String query = "select * from users where username = '" + username + "' AND " + "password = '" + hashed_password +"'";
-        UserModel User = this.db.select_user_query(query);
-        if(User.username!=null){
-            return true;
-        }
-        return false;
     }
 
 
@@ -216,7 +203,7 @@ public class userdao {
     public String password_reset(String username, String oldpassword, String newpassword){
 
         // See if the user credentials are valid or not.
-        if(!are_credentials_valid(username, oldpassword)){
+        if(!are_valid_credentials(username, oldpassword)){
             return "The user credentials are invalid";
         }
 
@@ -229,16 +216,14 @@ public class userdao {
 
         String query = "select * from previous_passwords where  username = '" + User.username + "'";
 
-        ArrayList<PreviousPasswordModel> pplist =  this.db.select_previous_passwords_query(query);
-
-        previousPasswords pp = new previousPasswords(pplist);
+        User.pplist =  this.db.select_previous_passwords_query(query);
 
         // Does the new password satisfy the conditions given.
         if(!User.does_password_satisy_criteria()){
             message = "The password doesn't satisfy the following conditions";
         }
         // Because we need the hashed password here.
-        else if(pp.is_this_one_of_old_passwords(User.hashed_password)){
+        else if(User.is_this_one_of_old_passwords(User.hashed_password)){
             message = "You need to enter a different password other than your last 5 passwords.";
         }
         else{
@@ -248,8 +233,8 @@ public class userdao {
             this.db.update(query);
 
 
-            if(pp.get_length_of_list() >=5){
-                String oldest_password = pp.get_oldest_password();
+            if(User.get_length_of_pplist() >=5){
+                String oldest_password = User.get_oldest_password();
                 query = "delete from previous_passwords where password = '" + oldest_password + "'";
                 this.db.update(query);
                 System.out.println("As length was greater than 5, the oldest password was deleted");

@@ -13,6 +13,7 @@ public class UserModel {
     public Date creation_date;
     public Boolean is_locked;
 
+    public ArrayList<PreviousPasswordModel> pplist = new ArrayList<PreviousPasswordModel>();
 
     public String default_password="a";
 
@@ -38,4 +39,29 @@ public class UserModel {
         this.hashed_password = this.password;
     }
 
+    public int get_length_of_pplist(){
+        return this.pplist.size();
+    }
+
+    public String get_oldest_password(){
+        Date oldest_date  = new Date();
+        String oldest_password = null;
+        for(int i=0;i<this.pplist.size();i++){
+            Date d = this.pplist.get(i).creation_date;
+            if(oldest_date.compareTo(d) > 0){
+                oldest_date = d;
+                oldest_password = this.pplist.get(i).password;
+            }
+        }
+        return oldest_password;
+    }
+
+    public Boolean is_this_one_of_old_passwords(String password){
+        for(int i=0;i<this.pplist.size();i++){
+            if(this.pplist.get(i).password == password){
+                return true;
+            }
+        }
+        return false;
+    }
 }

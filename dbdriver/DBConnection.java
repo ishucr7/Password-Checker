@@ -6,16 +6,9 @@
 package dbdriver;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import config.Config;
 public class DBConnection {
     public static Connection createConnection()
     {
-
-        // Config cfg = new Config();
-        // String dbName   = cfg.getProperty("dbName");
-        // String dbUsername = cfg.getProperty("dbUsername");
-        // String dbPassword = cfg.getProperty("dbPassword");
-        // String dbHost = cfg.getProperty("dbHost");
 
         String dbUsername = "root";
         String dbPassword = "Radhaswami1"; // Enter your root's password here.
