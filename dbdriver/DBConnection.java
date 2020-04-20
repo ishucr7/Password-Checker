@@ -10,6 +10,8 @@ public class DBConnection {
     public static Connection createConnection()
     {
 
+
+        // Added a comment
         String dbUsername = "root";
         String dbPassword = "Radhaswami1"; // Enter your root's password here.
 
